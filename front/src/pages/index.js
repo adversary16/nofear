@@ -1,5 +1,7 @@
+import MainContainer from "../containers/MainContainer/MainContainer"
+
 const Home = () => {
-    return <div>Hi there</div>
+    return <MainContainer/>
 }
 
 export default Home
