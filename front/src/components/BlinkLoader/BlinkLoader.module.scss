@@ -1,0 +1,17 @@
+.blinkLoader {
+    color: #fff;
+    opacity: 0;
+    animation: blink-animation var(--blinkInterval) steps(10, start) infinite;
+    -webkit-animation: blink-animation  var(--blinkInterval) steps(10, start) infinite;
+}
+
+@keyframes blink-animation {
+    to {
+        opacity: 1;
+    }
+  }
+  @-webkit-keyframes blink-animation {
+    to {
+        opacity: 1;
+    }
+}

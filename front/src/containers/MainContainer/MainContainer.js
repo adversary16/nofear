@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux"
 import { connectionStates } from "../../const";
 import connectSocket from "../../redux/slices/callStateSlice.reducers/connectSocket";
+import ConnectingContainer from "../ConnectingContainer/ConnectingContainer";
+import IdleContainer from "../IdleContainer/IdleContainer";
 
 const MainContainer = (props) => {
     const dispatch = useDispatch();
@@ -9,7 +11,7 @@ const MainContainer = (props) => {
 
     switch (connectionState) {
         case connectionStates.offline:
-            return <div>offline</div>
+            return <ConnectingContainer/>
         case connectionStates.online:
             return <div>online</div>
         case connectionStates.busy:
