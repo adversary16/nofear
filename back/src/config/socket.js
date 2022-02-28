@@ -1,12 +1,23 @@
 const  { Server } = require('socket.io');
 const { SOCKET_PORT } = require("../const");
+const roomRoutes = require('../handlers/room');
 
-const io = new Server(SOCKET_PORT, {
-    path: '/ws/'
-});
+const appendRoutes = (socket, routes) => {
+    Object.entries(routes).map(([path, handler]) => {
+        socket.on(path, handler)
+    })
+}
 
-io.on('connection', () => {
-    console.log('connected')
-});
+const init = () => {
+    const io = new Server(SOCKET_PORT, {
+        path: '/ws/'
+    });
+    
+    io.on('connection', (socket) => {
+        socket.emit('queue_update', roomRoutes.onConnected());
+        appendRoutes(socket, roomRoutes);
+    });
+    return io;
+}
 
-module.exports = io
+module.exports = init

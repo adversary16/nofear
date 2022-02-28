@@ -1,26 +1,32 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux"
-import { connectionStates } from "../../const";
+import BlinkLoader from "../../components/BlinkLoader/BlinkLoader";
+import { callStates, connectionStates } from "../../const";
 import {SocketContextProvider} from "../../contexts/SocketContext";
 import { connect } from "../../redux/slices/connectionSlice";
 import ConnectingContainer from "../ConnectingContainer/ConnectingContainer";
 import IdleContainer from "../IdleContainer/IdleContainer";
 
+const CallContainer = ({ callState }) => {
+    switch (callState) {
+        case callStates.idle:
+            return <IdleContainer/>
+        case callStates.connecting:
+            return <BlinkLoader caption='please wait'/>
+        case callStates.ready: 
+            return <div>call ready</div>
+        default: 
+            return <IdleContainer/>
+    }
+}
+
 const MainContainer = (props) => {
-    const dispatch = useDispatch();
-    const { state: connectionState } = useSelector( state => state.connection );
-
-    useEffect(() => {
-        console.log({connectionState})
-    }, [connectionState])
-
+    const { socketState: connectionState, callState } = useSelector( state => state.connection );
     switch (connectionState) {
         case connectionStates.offline:
             return <ConnectingContainer/>
         case connectionStates.online:
-            return <IdleContainer/>
-        case connectionStates.busy:
-            return <div>busy</div>
+            return <CallContainer {...{callState}}/>
         case connectionStates.error:
             return <div>error</div>
         default:

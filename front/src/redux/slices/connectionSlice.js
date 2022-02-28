@@ -1,19 +1,23 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { connectionStates } from "../../const";
-import connectSocket from "./callStateSlice.reducers/connectSocket";
+import { callStates, connectionStates } from "../../const";
+import setCallState from "./callStateSlice.reducers/setCallState";
 import setConnectionState from "./callStateSlice.reducers/setConnectionState";
 
 const connectionSlice = createSlice({
     name: 'callState',
     initialState: {
-        state: connectionStates.offline,
-        socket: null,
+        socketState: connectionStates.offline,
+        callState: callStates.idle,
+        isSomeoneInQueue: false,
     },
     reducers: {
         updateState: setConnectionState,
-        connect: connectSocket
+        updateCallState: setCallState,
+        updateQueue: (state, data) => { 
+            state.isSomeoneInQueue = data.payload
+        }
     }
 })
 
-export const { connect, updateState } = connectionSlice.actions;
+export const { connect, updateState, updateCallState, updateQueue } = connectionSlice.actions;
 export default connectionSlice.reducer

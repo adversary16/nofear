@@ -5,4 +5,11 @@ export const connectionStates = {
     busy: 'busy'
 }
 
+export const callStates = {
+    idle: 'idle',
+    requested: 'requested',
+    connecting: 'connecting',
+    ready: 'ready'
+}
+
 export const socketPath = '/ws'
