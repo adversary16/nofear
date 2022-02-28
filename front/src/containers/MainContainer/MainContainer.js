@@ -9,6 +9,10 @@ const MainContainer = (props) => {
     const dispatch = useDispatch();
     const { state: connectionState } = useSelector( state => state.connection );
 
+    // useEffect(() => {
+    //     dispatch(connectSocket())
+    // }, [])
+
     switch (connectionState) {
         case connectionStates.offline:
             return <ConnectingContainer/>

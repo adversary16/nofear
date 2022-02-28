@@ -4,3 +4,5 @@ export const connectionStates = {
     error: 'error',
     busy: 'busy'
 }
+
+export const socketPath = '/ws'
