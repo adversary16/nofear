@@ -1,27 +1,41 @@
-const requesterPool = new Set();
+const { v4 } = require('uuid')
+
+const requesterPool = new Map();
 const activeCalls = new Map();
 
 
 const onConnected = () => {
+    console.log({requesterPool})
     return { isSomeoneInQueue: Boolean(requesterPool.size)}
 }
 
 function onCallRequest () {
-    if (requesterPool.size === 0) {
-        console.log(onConnected())
-        this.broadcast.emit('queue_update', onConnected())
-    }
-    requesterPool.add(this.client.id);
-    console.log({requesterPool})
-
+    const clientSideId = this.client.sockets.keys().next().value
+    requesterPool.set(this.client.id, clientSideId);
+    this.broadcast.emit('queue_update', onConnected())
 }
 
 function onCallAccept () {
     if (requesterPool.size) {
-        const {value: requester} = requesterPool.values().next();
-        requesterPool.delete(requester);
-        activeCalls.set(this.client.id, requester)
-        this.emit('call_initiate', requester);
+        const [remotePartyId, localPartyId] = requesterPool.entries().next().value;
+        const localClientId = this.client.sockets.keys().next().value;
+
+        requesterPool.delete(localPartyId);
+        const callId = v4();
+        this.emit('call_initiate', callId);
+        this.broadcast.to(localPartyId).emit('call_expect', callId)
+        activeCalls.set(callId, {
+            [remotePartyId]: localPartyId,
+            [this.client.id]: localClientId
+        })
+    }
+}
+
+function onOffer (offer, callId) {
+    const currentCall = activeCalls.get(callId);
+    if (currentCall) {
+        const otherPartyId = Object.keys(currentCall).find(id => id !== this.client.id);
+        this.broadcast.to(currentCall[otherPartyId]).emit('offer', offer)
     }
 }
 
@@ -32,11 +46,13 @@ function onCallDecline () {
 
 function onDisconnect () {
     requesterPool.delete(this.client.id)
-    console.log(this.client.id, 'disco')
+    requesterPool.delete(this.client.sockets.keys().next().value)
+    activeCalls.delete(this.client.id)
 }
 
 const roomRoutes = {
     onConnected,
+    offer: onOffer,
     call_request: onCallRequest,
     call_accept: onCallAccept,
     disconnect: onDisconnect

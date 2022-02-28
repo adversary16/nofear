@@ -1,7 +1,7 @@
-import React, { Children, useContext, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { callStates } from '../const';
-import { CALL_REQUEST } from '../const/socketMessages';
+import React, { Children, useContext, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { callStates, RTCStates } from '../const';
+import { CALL_ACCEPT, CALL_INITIATE, CALL_REQUEST } from '../const/socketMessages';
 import { updateCallState } from '../redux/slices/connectionSlice';
 import { SocketContext } from './SocketContext';
 
@@ -10,15 +10,47 @@ export const WebRTCContext = React.createContext();
 export const WebRTCProvider = ({children}) => {
     const dispatch = useDispatch();
     const { socket } = useContext(SocketContext)
+    const { webRTC } = useSelector(state => state.connection);
+
+    const [peerConnection, setPeerConnection] = useState(null);
 
     const requestCall = () => {
         socket.emit(CALL_REQUEST);
         dispatch(updateCallState(callStates.requested));
     }
 
-    const actions = {
-        requestCall
+    const acceptCall = () => {
+        socket.emit(CALL_ACCEPT);
     }
+
+    const actions = {
+        requestCall,
+        acceptCall
+    }
+
+    useEffect(async () => {
+        console.log({webRTC})
+        let localDescription;
+        if ([RTCStates.invoked, RTCStates.waiting].includes(webRTC.state)) {
+            if (peerConnection) {
+                peerConnection.close()
+            }
+            const localStream = await navigator.mediaDevices.getUserMedia({audio: true});
+            const conn = new RTCPeerConnection();    
+            localStream.getTracks().forEach(track => {
+                conn.addTrack(track)
+            });
+            localDescription = await conn.createOffer();
+            conn.addEventListener('icecandidate', (e) => {console.log(e)});
+            setPeerConnection(conn);
+        }
+
+
+        if (webRTC.state === RTCStates.invoked) {
+            socket.emit('offer', localDescription, webRTC.callId)
+        }
+
+    }, [webRTC.state])
     return <WebRTCContext.Provider value={{actions}}>
         {children}
     </WebRTCContext.Provider>

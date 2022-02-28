@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react"
+import { useContext } from "react"
 import { useSelector } from "react-redux";
 import CallButton from "../../components/CallButton/CallButton"
 import { callStates } from "../../const";
@@ -6,13 +6,10 @@ import { WebRTCContext } from "../../contexts/WebRTCContext"
 
 const IdleContainer = (props) => {
     const { actions } = useContext(WebRTCContext);
-    const { requestCall } = actions;
+    const { requestCall, acceptCall } = actions;
 
     const { callState, isSomeoneInQueue } = useSelector(state => state.connection);
 
-    useEffect(() => {
-        console.log(isSomeoneInQueue)
-    }, [isSomeoneInQueue])
     return <>
     <CallButton
         onClick={
@@ -20,8 +17,12 @@ const IdleContainer = (props) => {
         }
     />
     {
-        isSomeoneInQueue && <CallButton
+        isSomeoneInQueue && 
+        <CallButton
             caption='pick a call'
+            onClick={
+                acceptCall
+            }
         />
     }
     </>

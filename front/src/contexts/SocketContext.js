@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { io } from 'socket.io-client'
 
-import { connectionStates, socketPath } from '../const';
-import { QUEUE_UPDATE } from "../const/socketMessages";
-import { updateQueue, updateState } from "../redux/slices/connectionSlice";
+import { callStates, connectionStates, RTCStates, socketPath } from '../const';
+import { CALL_EXPECT, CALL_INITIATE, QUEUE_UPDATE } from "../const/socketMessages";
+import { setRtcState, updateCallState, updateQueue, updateState } from "../redux/slices/connectionSlice";
 
 export const SocketContext = React.createContext();
 
@@ -37,6 +37,16 @@ export const SocketContextProvider = ({children})  => {
 
     socket.on(QUEUE_UPDATE, ({isSomeoneInQueue}) => {
         dispatch(updateQueue(isSomeoneInQueue))
+    });
+
+    socket.on(CALL_INITIATE, (callId) => {
+        dispatch(updateCallState(callStates.connecting))
+        dispatch(setRtcState({state: RTCStates.invoked, callId}))
+    })
+
+    socket.on(CALL_EXPECT, (callId) => {
+        dispatch(updateCallState(callStates.connecting))
+        dispatch(setRtcState({state: RTCStates.waiting, callId}))
     })
 
     const value = {
