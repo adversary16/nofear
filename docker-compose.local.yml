@@ -4,9 +4,13 @@ services:
     build:
       context: ./front
       dockerfile: Dockerfile.dev
-    ports:
-      - 3000:3000
     volumes:
       - ./front:/app/
     entrypoint: npm run dev
-    
+  back:
+    build:
+      context: ./back
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./back:/app/
+    entrypoint: npm run dev
