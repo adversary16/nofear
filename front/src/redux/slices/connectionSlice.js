@@ -10,10 +10,10 @@ const connectionSlice = createSlice({
         socket: null,
     },
     reducers: {
-        setConnectionState,
+        updateState: setConnectionState,
         connect: connectSocket
     }
 })
 
-// export const { connect } = connectionSlice.actions;
+export const { connect, updateState } = connectionSlice.actions;
 export default connectionSlice.reducer

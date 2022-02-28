@@ -6,11 +6,12 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./src/index.js",
-    "dev": "nodemon -L -w /src"
+    "dev": "nodemon -L -w ./src"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.17.3",
     "socket.io": "^4.4.1"
   },
   "devDependencies": {

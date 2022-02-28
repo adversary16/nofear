@@ -1,16 +1,17 @@
 import { io } from 'socket.io-client'
-import { socketPath } from '../../../const';
+import { connectionStates, socketPath } from '../../../const';
 
 const connectSocket = (state) => {
     const socket = io({
-        path: socketPath
+        path: socketPath,
+        transports: ['websocket']
     });
     if (socket) {
-        state.socket = socket
+        state.state = connectionStates.online;
+        return socket
     } else {
         console.error('connetion failed')
     }
-    return state
 }
 
 export default connectSocket

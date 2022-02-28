@@ -1,10 +1,9 @@
 import { connectionStates } from "../../../const"
 
 const setConnectionState = (state, update, cb) => {
-    if (connectionStates.values.includes(update)) {
-        state.connectionState = update;
+    if (Object.values(connectionStates).includes(update.payload)) {
+        state.state = update.payload;
         if (cb && typeof(cb) === 'function' ) cb()
-        return state;
     } else {
         throw new Error('No such state')
     }

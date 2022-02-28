@@ -1,8 +1,10 @@
-const init = require("./config/socket")
+// const init = require("./config/socket")
+
+const io = require("./config/socket")
+const { SOCKET_PORT } = require("./const")
 
 const run = () => {
     try {
-        init();
     } catch (e) {
         console.log('error')
     }
