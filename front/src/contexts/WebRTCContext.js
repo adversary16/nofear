@@ -1,7 +1,7 @@
 import React, { Children, useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { callStates, RTCStates } from '../const';
-import { CALL_ACCEPT, CALL_INITIATE, CALL_REQUEST } from '../const/socketMessages';
+import { CALL_ACCEPT, CALL_INITIATE, CALL_REQUEST, WEBRTC_OFFER } from '../const/socketMessages';
 import { updateCallState } from '../redux/slices/connectionSlice';
 import { SocketContext } from './SocketContext';
 
@@ -13,6 +13,7 @@ export const WebRTCProvider = ({children}) => {
     const { webRTC } = useSelector(state => state.connection);
 
     const [peerConnection, setPeerConnection] = useState(null);
+    const [localStream, setLocalStream] = useState(null);
 
     const requestCall = () => {
         socket.emit(CALL_REQUEST);
@@ -29,28 +30,36 @@ export const WebRTCProvider = ({children}) => {
     }
 
     useEffect(async () => {
-        console.log({webRTC})
-        let localDescription;
+
         if ([RTCStates.invoked, RTCStates.waiting].includes(webRTC.state)) {
             if (peerConnection) {
                 peerConnection.close()
             }
-            const localStream = await navigator.mediaDevices.getUserMedia({audio: true});
             const conn = new RTCPeerConnection();    
-            localStream.getTracks().forEach(track => {
-                conn.addTrack(track)
-            });
-            localDescription = await conn.createOffer();
+
             conn.addEventListener('icecandidate', (e) => {console.log(e)});
             setPeerConnection(conn);
         }
 
 
         if (webRTC.state === RTCStates.invoked) {
-            socket.emit('offer', localDescription, webRTC.callId)
+            socket.emit(WEBRTC_OFFER, localDescription, webRTC.callId)
+        }
+
+        if (webRTC.state === RTCStates.waiting) {
+            socket.on('offer', (offer) => {
+                peerConnection.setRemoteDescription(offer);
+            })
         }
 
     }, [webRTC.state])
+
+    useEffect(async () => {
+        if (!peerConnection) return;
+        const local = await navigator.mediaDevices.getUserMedia({audio: true});
+        setLocalStream(local);
+
+    }, [peerConnection])
     return <WebRTCContext.Provider value={{actions}}>
         {children}
     </WebRTCContext.Provider>
