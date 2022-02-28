@@ -6,10 +6,10 @@ services:
   back:
     build:
       context: ./back
-    ports:
-      - 3001:3001
   nginx:
     image: nginx:latest
     volumes:
       - ./nginx/:/etc/nginx/conf.d
+    ports:
+      - 3000:80
     
